@@ -40,9 +40,9 @@ flag = False
 for hero in heroes:
 	if hero['name'].lower() == name.lower():
 		flag = True
-		print('tier:', hero['tier'])
-		print('rol:', hero['role'])
-		print('winrate:', hero['win_rate'],"%")
+		print('Tier:', hero['tier'])
+		print('Rol:', hero['role'])
+		print('Winrate:', hero['win_rate'],"%")
 		print("Línea", end=': ')
 		if hero['is_jungle']: print('Jungla',end=' ')
 		if hero['is_mid']: print('Media',end=' ')
@@ -54,4 +54,4 @@ for hero in heroes:
 		break
 
 if not flag: 
-	print('No existe un héroe con ese nombre')
+	print('No existe un héroe con ese nombre, intenta con su versión en Inglés')
