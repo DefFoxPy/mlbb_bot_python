@@ -21,7 +21,7 @@ heroes = data['props']['pageProps']["heroData"]
 flag = False
 
 for hero in heroes:
-	if hero['name'] == name.title():
+	if hero['name'].lower() == name.lower():
 		flag = True
 		print('tier:', hero['tier'])
 		print('rol:', hero['role'])
