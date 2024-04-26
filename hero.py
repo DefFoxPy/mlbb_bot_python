@@ -42,7 +42,8 @@ for hero in heroes:
 		flag = True
 		print('Tier:', hero['tier'])
 		print('Rol:', hero['role'])
-		print('Winrate:', hero['win_rate'],"%")
+		print('Rank: win:', hero['win_rate'],"%", 'pick', hero['pick_rate'],'%', 'ban:', hero['ban_rate'],'%')
+		print('Puntuación:', round(float(hero['final_score']) * 100), end='/100\n')
 		print("Línea", end=': ')
 		if hero['is_jungle']: print('Jungla',end=' ')
 		if hero['is_mid']: print('Media',end=' ')
