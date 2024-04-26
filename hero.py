@@ -3,16 +3,19 @@ pide le nombre de un héroe para posteriormente consultar sus datos en la págin
 mlbb.ninja y devolver la info
 """
 
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
 import urllib.request
 import json
 
 name = input("Nombre del héroe: ")
+etiqueta_inicio_hero = '<script id="__NEXT_DATA__" type="application/json">'
+etiqueta_final_hero = '</script>'
 
-datos = urllib.request.urlopen('https://www.mlbb.ninja').read().decode()
-soup =  BeautifulSoup(datos, 'html.parser')
-result = soup.find(id='__NEXT_DATA__', type="application/json")
-data = json.loads(result.text)
+contenido_web = urllib.request.urlopen('https://www.mlbb.ninja').read().decode('utf-8') 
+inicio = contenido_web.find(etiqueta_inicio_hero) + len(etiqueta_inicio_hero)
+fin = contenido_web.find(etiqueta_final_hero, inicio)
+text = contenido_web[inicio:fin]
+data = json.loads(text)
 heroes = data['props']['pageProps']["heroData"]
 
 flag = False
