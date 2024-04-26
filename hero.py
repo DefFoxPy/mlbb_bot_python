@@ -8,15 +8,32 @@ import urllib.request
 import json
 
 name = input("Nombre del héroe: ")
+contenido_web = urllib.request.urlopen('https://www.mlbb.ninja').read().decode('utf-8') 
+
+# obtiene los datos de los héroes en la página
 etiqueta_inicio_hero = '<script id="__NEXT_DATA__" type="application/json">'
 etiqueta_final_hero = '</script>'
-
-contenido_web = urllib.request.urlopen('https://www.mlbb.ninja').read().decode('utf-8') 
 inicio = contenido_web.find(etiqueta_inicio_hero) + len(etiqueta_inicio_hero)
 fin = contenido_web.find(etiqueta_final_hero, inicio)
 text = contenido_web[inicio:fin]
 data = json.loads(text)
 heroes = data['props']['pageProps']["heroData"]
+
+# obtiene la información del parche actual 
+etiqueta_patch = '<span class="MuiChip-label MuiChip-labelMedium css-9iedg7">'
+inicio = contenido_web.find(etiqueta_patch + "Patch") + len(etiqueta_patch)
+fin = contenido_web.find('</span>', inicio)
+text = contenido_web[inicio:fin]
+print(text)
+
+# obtiene la información de la última fecha en que fué actualizada la página
+etiqueta_data = '<p class="MuiTypography-root MuiTypography-body1 MuiTypography-alignCenter css-ok37je">'
+inicio = contenido_web.find(etiqueta_data + "Data last updated on ") + len(etiqueta_data)
+fin = contenido_web.find('</p>', inicio)
+text = contenido_web[inicio:fin]
+text = text.replace('<strong>', '')
+text = text.replace('</strong>', '')
+print(text)   
 
 flag = False
 
