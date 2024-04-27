@@ -1,58 +1,59 @@
 """
 pide le nombre de un héroe para posteriormente consultar sus datos en la página
-mlbb.ninja y devolver la info
+mlbb.ninja y devolver su info
 """
-
-#from bs4 import BeautifulSoup
 import urllib.request
 import json
 
-name = input("Nombre del héroe: ")
-contenido_web = urllib.request.urlopen('https://www.mlbb.ninja').read().decode('utf-8') 
+def extraer_texto(contenido_web : urllib.request, tags_ini :str, tags_end :str, args = "") -> str:
+	try:
+		inicio = contenido_web.find(tags_ini + args) + len(tags_ini)
+		fin = contenido_web.find(tags_end, inicio)
+		return contenido_web[inicio:fin]
+	except:
+		return ""
 
-# obtiene los datos de los héroes en la página
-etiqueta_inicio_hero = '<script id="__NEXT_DATA__" type="application/json">'
-etiqueta_final_hero = '</script>'
-inicio = contenido_web.find(etiqueta_inicio_hero) + len(etiqueta_inicio_hero)
-fin = contenido_web.find(etiqueta_final_hero, inicio)
-text = contenido_web[inicio:fin]
-data = json.loads(text)
-heroes = data['props']['pageProps']["heroData"]
+def print_hero(hero : dict) -> None:
+	print('Tier:', hero['tier'])
+	print('Rol:', hero['role'])
+	print('Rank: win:', hero['win_rate'],"%", 'pick', hero['pick_rate'],'%', 'ban:', hero['ban_rate'],'%')
+	print('Puntuación:', round(float(hero['final_score']) * 100), end='/100\n')
+	print("Línea", end=': ')
+	if hero['is_jungle']: print('Jungla',end=' ')
+	if hero['is_mid']: print('Media',end=' ')
+	if hero['is_exp']: print('Experiencia',end=' ')
+	if hero['is_gold']: print('Oro',end=' ')
+	if hero['is_roam']: print('Roam',end=' ')
+	#print(hero['image_link'])
+	print()
 
-# obtiene la información del parche actual 
-etiqueta_patch = '<span class="MuiChip-label MuiChip-labelMedium css-9iedg7">'
-inicio = contenido_web.find(etiqueta_patch + "Patch") + len(etiqueta_patch)
-fin = contenido_web.find('</span>', inicio)
-text = contenido_web[inicio:fin]
-print(text)
+def is_hero(hero: dict, name: str) -> bool:
+	return hero['name'].lower() == name.lower()
 
-# obtiene la información de la última fecha en que fué actualizada la página
-etiqueta_data = '<p class="MuiTypography-root MuiTypography-body1 MuiTypography-alignCenter css-ok37je">'
-inicio = contenido_web.find(etiqueta_data + "Data last updated on ") + len(etiqueta_data)
-fin = contenido_web.find('</p>', inicio)
-text = contenido_web[inicio:fin]
-text = text.replace('<strong>', '')
-text = text.replace('</strong>', '')
-print(text)   
+def main():
+	name = input("Nombre del héroe: ")
+	contenido_web = urllib.request.urlopen('https://www.mlbb.ninja').read().decode('utf-8') 
+	# obtiene los datos de los héroes en la página
+	text = extraer_texto(contenido_web, '<script id="__NEXT_DATA__" type="application/json">', '</script>')
+	data = json.loads(text)
+	heroes = data['props']['pageProps']["heroData"]
+	# obtiene la información del parche actual 
+	text = extraer_texto(contenido_web, '<span class="MuiChip-label MuiChip-labelMedium css-9iedg7">', '</span>', 'Patch')
+	print(text)
+	# obtiene la información de la última fecha en que fué actualizada la página
+	text = extraer_texto(contenido_web, '<p class="MuiTypography-root MuiTypography-body1 MuiTypography-alignCenter css-ok37je">', '</p>', 'Data last updated on ')
+	text = text.replace('<strong>', '')
+	text = text.replace('</strong>', '')
+	print(text)   
 
-flag = False
+	found = False
+	for hero in heroes:
+		if is_hero(hero, name):
+			found = True
+			print_hero(hero)
+			break
+	if not found: 
+		print('No existe un héroe con ese nombre, intenta con su versión en Inglés')
 
-for hero in heroes:
-	if hero['name'].lower() == name.lower():
-		flag = True
-		print('Tier:', hero['tier'])
-		print('Rol:', hero['role'])
-		print('Rank: win:', hero['win_rate'],"%", 'pick', hero['pick_rate'],'%', 'ban:', hero['ban_rate'],'%')
-		print('Puntuación:', round(float(hero['final_score']) * 100), end='/100\n')
-		print("Línea", end=': ')
-		if hero['is_jungle']: print('Jungla',end=' ')
-		if hero['is_mid']: print('Media',end=' ')
-		if hero['is_exp']: print('Experiencia',end=' ')
-		if hero['is_gold']: print('Oro',end=' ')
-		if hero['is_roam']: print('Roam',end=' ')
-		print()
-		#print(hero['image_link'])
-		break
-
-if not flag: 
-	print('No existe un héroe con ese nombre, intenta con su versión en Inglés')
+if __name__ == '__main__':
+	main()
