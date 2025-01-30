@@ -72,14 +72,34 @@ async def generar_grafo(ctx, canal: discord.TextChannel):
         return
 
     # Dibujar el grafo
-    pos = nx.spring_layout(G)
-    plt.figure(figsize=(12, 8))
-    nx.draw(G, pos, with_labels=True, node_size=2000, node_color="skyblue", font_size=10, font_weight="bold", arrows=True)
+    pos = nx.spring_layout(G, k=0.5, iterations=50)  # Ajustar el layout para evitar superposiciones
+    plt.figure(figsize=(14, 10))
+
+    # Dibujar nodos
+    nx.draw_networkx_nodes(G, pos, node_size=3000, node_color="skyblue", alpha=0.9)
+
+    # Dibujar aristas con colores personalizados
+    edge_colors = []
+    for u, v in G.edges():
+        if G.has_edge(v, u):  # Si hay una mención bidireccional
+            edge_colors.append("red")  # Flecha roja para menciones bidireccionales
+        else:
+            edge_colors.append("gray")  # Flecha gris para menciones unidireccionales
+
+    nx.draw_networkx_edges(G, pos, edge_color=edge_colors, arrowstyle="->", arrowsize=20, width=2)
+
+    # Dibujar etiquetas de los nodos
+    nx.draw_networkx_labels(G, pos, font_size=12, font_weight="bold", font_color="darkblue")
+
+    # Dibujar etiquetas de las aristas (pesos)
     edge_labels = nx.get_edge_attributes(G, 'weight')
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color="red")
+
+    # Añadir un título al grafo
+    plt.title(f"Grafo de menciones en #{canal.name}", fontsize=16, fontweight="bold")
 
     # Guardar la imagen del grafo
-    plt.savefig("grafo.png")
+    plt.savefig("grafo.png", bbox_inches="tight", dpi=300)
     plt.close()
 
     # Enviar la imagen al canal
