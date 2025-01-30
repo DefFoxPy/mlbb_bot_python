@@ -4,13 +4,16 @@ from discord.ext import commands
 import networkx as nx
 import matplotlib.pyplot as plt
 
+# Cambiar la fuente predeterminada
+plt.rcParams['font.family'] = 'DejaVu Sans'
+
 # Configura el bot
 intents = discord.Intents.default()
 intents.messages = True
 intents.message_content = True
 intents.members = True 
 
-prefix = "!z"
+prefix = "z!"
 
 bot = commands.Bot(command_prefix=prefix, intents=intents, application_id=config.APPLICATION_ID)
 
@@ -70,7 +73,7 @@ async def generar_grafo(ctx, canal: discord.TextChannel):
     if G.number_of_edges() == 0:
         await ctx.send("No se encontraron menciones válidas para crear el grafo.")
         return
-
+    
     # Dibujar el grafo
     pos = nx.spring_layout(G, k=0.5, iterations=50)  # Ajustar el layout para evitar superposiciones
     plt.figure(figsize=(14, 10))
@@ -81,12 +84,11 @@ async def generar_grafo(ctx, canal: discord.TextChannel):
     # Dibujar aristas con colores personalizados
     edge_colors = []
     for u, v in G.edges():
-        if G.has_edge(v, u):  # Si hay una mención bidireccional
-            edge_colors.append("red")  # Flecha roja para menciones bidireccionales
-        else:
-            edge_colors.append("gray")  # Flecha gris para menciones unidireccionales
+        edge_colors.append("gray")  # Todas las flechas en gris
 
-    nx.draw_networkx_edges(G, pos, edge_color=edge_colors, arrowstyle="->", arrowsize=20, width=2)
+    nx.draw_networkx_edges(
+        G, pos, edge_color=edge_colors, arrowstyle="->", arrowsize=20, width=2
+    )
 
     # Dibujar etiquetas de los nodos
     nx.draw_networkx_labels(G, pos, font_size=12, font_weight="bold", font_color="darkblue")
@@ -104,6 +106,7 @@ async def generar_grafo(ctx, canal: discord.TextChannel):
 
     # Enviar la imagen al canal
     await ctx.send(file=discord.File("grafo.png"))
+
 
 # Reemplaza 'TU_TOKEN' con el token de tu bot
 bot.run(config.TOKEN)
