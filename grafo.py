@@ -81,18 +81,28 @@ async def generar_grafo(ctx, canal: discord.TextChannel, limit=config.LIMIT, k_v
     # Dibujar nodos
     nx.draw_networkx_nodes(G, pos, node_size=3000, node_color="skyblue", alpha=0.9)
 
+    # Encontrar el arco con el mayor peso
+    max_weight = max(weight for _, _, weight in G.edges(data='weight'))
+    max_edge = next((u, v) for u, v, weight in G.edges(data='weight') if weight == max_weight)
+
     # Dibujar aristas con colores personalizados, forma de arco y grosor proporcional al peso
     edge_colors = []
     edge_styles = []
     edge_widths = []
     for u, v in G.edges():
         weight = G[u][v]['weight']
-        if G.has_edge(v, u):  # Si hay una mención bidireccional
+
+        if (u, v) == max_edge or (v, u) == max_edge:  # Si es el arco con el mayor peso
+            edge_colors.append("green")  # Flecha verde para el arco más pesado
+        elif G.has_edge(v, u):  # Si hay una mención bidireccional
             edge_colors.append("red")  # Flecha roja para menciones bidireccionales
-            edge_styles.append("arc3,rad=0.5")  # Forma de arco para evitar superposiciones
         else:
             edge_colors.append("gray")  # Flecha gris para menciones unidireccionales
-            edge_styles.append("arc3,rad=0.0")  # Sin arco para flechas unidireccionales
+
+        if G.has_edge(v, u):  # Forma de arco para evitar superposiciones
+            edge_styles.append("arc3,rad=0.2")
+        else:
+            edge_styles.append("arc3,rad=0.0")
         edge_widths.append(weight)  # Grosor proporcional al peso
 
     nx.draw_networkx_edges(
@@ -105,7 +115,7 @@ async def generar_grafo(ctx, canal: discord.TextChannel, limit=config.LIMIT, k_v
     nx.draw_networkx_labels(G, pos, font_size=12, font_weight="bold", font_color="darkblue")
 
     # Añadir un título al grafo
-    plt.title(f"Grafo de menciones en #{canal.name}", fontsize=16, fontweight="bold")
+    plt.title(f"Grafo de menciones en #{canal.name}, para {limit} mensajes", fontsize=16, fontweight="bold")
 
     # Guardar la imagen del grafo
     plt.savefig("grafo.png", bbox_inches="tight", dpi=300)
