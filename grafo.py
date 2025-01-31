@@ -103,7 +103,11 @@ async def generar_grafo(ctx, canal: discord.TextChannel, limit=config.LIMIT, k_v
             edge_styles.append("arc3,rad=0.2")
         else:
             edge_styles.append("arc3,rad=0.0")
-        edge_widths.append(weight)  # Grosor proporcional al peso
+
+        if max_weight > x_size:
+            edge_widths.append(weight // x_size + 1)  
+        else:
+            edge_widths.append(weight) 
 
     nx.draw_networkx_edges(
         G, pos, edge_color=edge_colors, style="solid",
