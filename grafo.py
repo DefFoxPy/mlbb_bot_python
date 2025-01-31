@@ -35,13 +35,13 @@ async def generar_grafo(ctx, canal: discord.TextChannel):
     print(f"Analizando mensajes en el canal: {canal.name}")
     async for message in canal.history(limit=config.LIMIT):
         if message.mentions:
-            print(f"Mensaje de {message.author}: {message.content}")
+            #print(f"Mensaje de {message.author}: {message.content}")
             author = message.author
             for mentioned_user in message.mentions:
                 if author != mentioned_user:
                     key = (author.id, mentioned_user.id)
                     mentions[key] = mentions.get(key, 0) + 1
-                    print(f"Mención registrada: {author} -> {mentioned_user}")
+                    #print(f"Mención registrada: {author} -> {mentioned_user}")
 
     # Verificar si hay menciones
     if not mentions:

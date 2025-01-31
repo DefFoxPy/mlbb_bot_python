@@ -7,4 +7,4 @@ APPLICATION_ID = os.environ['APPLICATION_ID']
 CANAL_ID = 1170927738392154182
 #ID_SERVER = os.environ['SERVER_ID'] 
 
-LIMIT = 100 # limite de mensajes
+LIMIT = 1000 # limite de mensajes
