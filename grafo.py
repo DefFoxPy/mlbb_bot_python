@@ -56,13 +56,13 @@ async def generar_grafo(ctx, canal: discord.TextChannel):
         # Obtener el nombre del autor
         author = ctx.guild.get_member(author_id)
         if author is None:
-            print(f"Usuario con ID {author_id} no encontrado. Ignorando...")
+            print(f"Usuario con ID {author_id} no encontrado en el servidor. Ignorando...")
             continue  # Ignorar si el usuario no está en el servidor
 
         # Obtener el nombre del usuario mencionado
         mentioned = ctx.guild.get_member(mentioned_id)
         if mentioned is None:
-            print(f"Usuario mencionado con ID {mentioned_id} no encontrado. Ignorando...")
+            print(f"Usuario mencionado con ID {mentioned_id} no encontrado en el servidor. Ignorando...")
             continue  # Ignorar si el usuario mencionado no está en el servidor
 
         # Añadir la arista al grafo
@@ -73,7 +73,7 @@ async def generar_grafo(ctx, canal: discord.TextChannel):
     if G.number_of_edges() == 0:
         await ctx.send("No se encontraron menciones válidas para crear el grafo.")
         return
-    
+
     # Dibujar el grafo
     pos = nx.spring_layout(G, k=0.5, iterations=50)  # Ajustar el layout para evitar superposiciones
     plt.figure(figsize=(14, 10))
@@ -81,13 +81,21 @@ async def generar_grafo(ctx, canal: discord.TextChannel):
     # Dibujar nodos
     nx.draw_networkx_nodes(G, pos, node_size=3000, node_color="skyblue", alpha=0.9)
 
-    # Dibujar aristas con colores personalizados
+    # Dibujar aristas con colores personalizados y forma de arco
     edge_colors = []
+    edge_styles = []
     for u, v in G.edges():
-        edge_colors.append("gray")  # Todas las flechas en gris
+        if G.has_edge(v, u):  # Si hay una mención bidireccional
+            edge_colors.append("red")  # Flecha roja para menciones bidireccionales
+            edge_styles.append("arc3,rad=0.2")  # Forma de arco para evitar superposiciones
+        else:
+            edge_colors.append("gray")  # Flecha gris para menciones unidireccionales
+            edge_styles.append("arc3,rad=0.0")  # Sin arco para flechas unidireccionales
 
     nx.draw_networkx_edges(
-        G, pos, edge_color=edge_colors, arrowstyle="->", arrowsize=20, width=2
+        G, pos, edge_color=edge_colors, style="solid",
+        arrowstyle="->", arrowsize=20, width=2,
+        connectionstyle=edge_styles
     )
 
     # Dibujar etiquetas de los nodos
