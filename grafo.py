@@ -27,13 +27,13 @@ async def on_ready():
     print(f'Bot conectado como {bot.user}')
 
 @bot.command()
-async def generar_grafo(ctx, canal: discord.TextChannel):
+async def generar_grafo(ctx, canal: discord.TextChannel, limit=config.LIMIT, k_value=1.5, x_size=14, y_size=10):
     # Limpiar el diccionario de menciones
     mentions.clear()
 
     # Obtener los mensajes del canal especificado
     print(f"Analizando mensajes en el canal: {canal.name}")
-    async for message in canal.history(limit=config.LIMIT):
+    async for message in canal.history(limit=limit):
         if message.mentions:
             #print(f"Mensaje de {message.author}: {message.content}")
             author = message.author
@@ -75,8 +75,8 @@ async def generar_grafo(ctx, canal: discord.TextChannel):
         return
 
     # Dibujar el grafo
-    pos = nx.spring_layout(G, k=0.5, iterations=50)  # Ajustar el layout para evitar superposiciones
-    plt.figure(figsize=(14, 10))
+    pos = nx.spring_layout(G, k=k_value, iterations=100)  # Aumentar k para separar más los nodos
+    plt.figure(figsize=(x_size, y_size))  # Aumentar el tamaño de la figura
 
     # Dibujar nodos
     nx.draw_networkx_nodes(G, pos, node_size=3000, node_color="skyblue", alpha=0.9)
@@ -89,11 +89,11 @@ async def generar_grafo(ctx, canal: discord.TextChannel):
         weight = G[u][v]['weight']
         if G.has_edge(v, u):  # Si hay una mención bidireccional
             edge_colors.append("red")  # Flecha roja para menciones bidireccionales
-            edge_styles.append("arc3,rad=0.2")  # Forma de arco para evitar superposiciones
+            edge_styles.append("arc3,rad=0.5")  # Forma de arco para evitar superposiciones
         else:
             edge_colors.append("gray")  # Flecha gris para menciones unidireccionales
             edge_styles.append("arc3,rad=0.0")  # Sin arco para flechas unidireccionales
-        edge_widths.append(weight * 1.5)  # Grosor proporcional al peso
+        edge_widths.append(weight)  # Grosor proporcional al peso
 
     nx.draw_networkx_edges(
         G, pos, edge_color=edge_colors, style="solid",
@@ -112,7 +112,7 @@ async def generar_grafo(ctx, canal: discord.TextChannel):
     plt.close()
 
     # Enviar la imagen al canal
-    await ctx.send(file=discord.File("grafo.png"))
+    await ctx.send(file=discord.File("grafo.png"))  
 
 
 # Reemplaza 'TU_TOKEN' con el token de tu bot
